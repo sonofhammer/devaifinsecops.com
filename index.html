@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAFSO — The DevAIFinSecOps Framework</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0a0e1a; --dark: #0f1525; --panel: #151c30; --border: #1e2d4a;
+  --accent: #00c8ff; --gold: #f5c842; --red: #ff3b3b; --green: #00ff88;
+  --muted: #8aa0be; --text: #dce8ff; --white: #e8f0ff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--navy); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; font-size: 19px; line-height: 1.7; }
+
+nav { background: var(--dark); border-bottom: 1px solid var(--border); padding: 0 1rem; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; }
+.nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--accent); letter-spacing: 2px; padding: 1rem 1.5rem 1rem 0; white-space: nowrap; border-right: 1px solid var(--border); margin-right: 1rem; }
+nav ul { display: flex; list-style: none; flex-wrap: wrap; }
+nav ul li a { display: block; padding: 1rem 0.9rem; color: var(--muted); text-decoration: none; font-size: 0.78rem; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s; }
+nav ul li a:hover { color: var(--accent); }
+.nav-cta { margin-left: auto; background: var(--accent); color: var(--navy) !important; font-weight: 700 !important; padding: 0.5rem 1.2rem !important; border-radius: 2px; white-space: nowrap; font-family: 'IBM Plex Mono', monospace !important; font-size: 0.82rem !important; letter-spacing: 1px !important; }
+.nav-cta:hover { background: #fff !important; }
+
+.ticker { background: var(--gold); color: var(--navy); padding: 0.35rem 0; overflow: hidden; white-space: nowrap; font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; font-weight: 700; letter-spacing: 1px; }
+.ticker-inner { display: inline-block; animation: ticker 40s linear infinite; }
+@keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+.hero { background: var(--dark); border-bottom: 1px solid var(--border); padding: 5rem 2rem 4rem; text-align: center; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(0,200,255,0.015) 80px, rgba(0,200,255,0.015) 81px), repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(0,200,255,0.015) 80px, rgba(0,200,255,0.015) 81px); }
+.hero-eyebrow { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 1.5rem; }
+.hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3.5rem, 10vw, 7rem); letter-spacing: 6px; color: var(--white); line-height: 0.95; margin-bottom: 1rem; }
+.hero h1 .v { color: var(--gold); } .hero h1 .y { color: var(--accent); } .hero h1 .l { color: var(--green); }
+.hero-sub { font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; color: var(--muted); letter-spacing: 4px; margin-bottom: 2rem; }
+.hero-tagline { font-size: 1.1rem; color: var(--text); max-width: 580px; margin: 0 auto 2.5rem; line-height: 1.65; }
+.hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.btn-primary { background: var(--accent); color: var(--navy); padding: 0.75rem 2rem; font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 0.88rem; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; border-radius: 2px; }
+.btn-primary:hover { background: #fff; }
+.btn-ghost { border: 1px solid var(--muted); color: var(--text); padding: 0.75rem 2rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; border-radius: 2px; }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+.stats-bar { background: var(--panel); border-bottom: 1px solid var(--border); }
+.stats-inner { max-width: 1100px; margin: 0 auto; padding: 1.5rem 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 1.5rem; text-align: center; }
+.stat-n { font-family: 'Bebas Neue', sans-serif; font-size: 2.6rem; letter-spacing: 2px; line-height: 1; }
+.stat-n.gold { color: var(--gold); } .stat-n.blue { color: var(--accent); } .stat-n.green { color: var(--green); } .stat-n.red { color: var(--red); }
+.stat-l { font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 0.2rem; }
+
+section { padding: 4rem 2rem; max-width: 1100px; margin: 0 auto; }
+.label { font-family: 'IBM Plex Mono', monospace; font-size: 0.95rem; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
+h2 { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; letter-spacing: 2px; color: var(--white); margin-bottom: 1rem; }
+hr { border: none; border-top: 1px solid var(--border); }
+p { margin-bottom: 0.75rem; } p:last-child { margin-bottom: 0; }
+
+.vyl-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; margin-top: 2rem; border: 1px solid var(--border); }
+@media (max-width: 750px) { .vyl-grid { grid-template-columns: 1fr; } }
+.vyl-card { padding: 2.5rem 2rem; position: relative; overflow: hidden; border-right: 1px solid var(--border); }
+.vyl-card:last-child { border-right: none; }
+.vyl-bg { position: absolute; bottom: -1rem; right: 1rem; font-family: 'Bebas Neue', sans-serif; font-size: 8rem; letter-spacing: 6px; opacity: 0.05; line-height: 1; pointer-events: none; }
+.vyl-phase { font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 0.5rem; }
+.vyl-name { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; letter-spacing: 4px; line-height: 1; margin-bottom: 0.25rem; }
+.vyl-sub { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 1.5rem; opacity: 0.6; }
+.vyl-card p { font-size: 1.05rem; color: var(--text); line-height: 1.7; }
+.vyl-vibe .vyl-phase { color: rgba(245,200,66,0.7); } .vyl-vibe .vyl-name { color: var(--gold); } .vyl-vibe .vyl-bg { color: var(--gold); }
+.vyl-yeet .vyl-phase { color: rgba(0,200,255,0.7); } .vyl-yeet .vyl-name { color: var(--accent); } .vyl-yeet .vyl-bg { color: var(--accent); }
+.vyl-land .vyl-phase { color: rgba(0,255,136,0.7); } .vyl-land .vyl-name { color: var(--green); } .vyl-land .vyl-bg { color: var(--green); }
+.vyl-replaces { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.vyl-replaces-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 0.5rem; }
+.tag { display: inline-block; padding: 0.2rem 0.6rem; margin: 0.15rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; letter-spacing: 0.5px; border-radius: 2px; }
+.tag-gold { background: rgba(245,200,66,0.1); color: var(--gold); border: 1px solid rgba(245,200,66,0.25); }
+.tag-blue { background: rgba(0,200,255,0.1); color: var(--accent); border: 1px solid rgba(0,200,255,0.25); }
+.tag-green { background: rgba(0,255,136,0.1); color: var(--green); border: 1px solid rgba(0,255,136,0.25); }
+.vyl-equation { margin-top: 0; padding: 1.5rem 2rem; background: var(--panel); border: 1px solid var(--border); border-top: none; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 4px; }
+.eq-note { font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; color: var(--muted); letter-spacing: 1px; margin-top: 0.4rem; }
+
+.supersedes { background: var(--panel); border: 1px solid var(--border); padding: 2rem; margin-top: 2rem; }
+.supersedes-row { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+.sup-old { font-family: 'IBM Plex Mono', monospace; font-size: 0.95rem; color: var(--muted); text-decoration: line-through; flex: 1; min-width: 200px; }
+.sup-arrow { color: var(--accent); font-size: 1rem; flex-shrink: 0; }
+.sup-new { font-family: 'IBM Plex Mono', monospace; font-size: 0.95rem; flex: 1; min-width: 100px; }
+.sup-vibe { color: var(--gold); } .sup-yeet { color: var(--accent); } .sup-land { color: var(--green); }
+
+.land-steps { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1px; background: var(--border); margin-top: 2rem; border: 1px solid var(--border); }
+.land-step { background: var(--panel); padding: 1.5rem; }
+.land-num { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--border); line-height: 1; margin-bottom: 0.5rem; }
+.land-step h3 { font-family: 'IBM Plex Mono', monospace; font-size: 1.05rem; color: var(--green); margin-bottom: 0.5rem; }
+.land-step p { font-size: 1rem; color: var(--muted); }
+.land-note { margin-top: 1rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; color: var(--muted); padding: 0.75rem 1rem; border: 1px solid var(--border); line-height: 1.7; }
+
+.gravity { margin-top: 2rem; }
+.gravity-org { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); }
+.gravity-tier { display: flex; align-items: flex-start; padding: 1.5rem; border-bottom: 1px solid var(--border); gap: 1.5rem; }
+.gravity-tier:last-child { border-bottom: none; }
+.gravity-tier.top { background: rgba(245,200,66,0.04); }
+.gravity-tier.mid { background: rgba(0,200,255,0.03); }
+.gravity-tier.bot { background: rgba(0,255,136,0.03); }
+.gravity-role { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 2px; min-width: 160px; flex-shrink: 0; }
+.gravity-tier.top .gravity-role { color: var(--gold); }
+.gravity-tier.mid .gravity-role { color: var(--accent); }
+.gravity-tier.bot .gravity-role { color: var(--green); }
+.gravity-does { font-size: 1rem; color: var(--text); flex: 1; }
+.gravity-does em { color: var(--muted); font-style: italic; }
+.gravity-phase { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; letter-spacing: 2px; padding: 0.2rem 0.6rem; border-radius: 2px; white-space: nowrap; flex-shrink: 0; }
+.gravity-tier.top .gravity-phase { background: rgba(245,200,66,0.12); color: var(--gold); border: 1px solid rgba(245,200,66,0.25); }
+.gravity-tier.mid .gravity-phase { background: rgba(0,200,255,0.12); color: var(--accent); border: 1px solid rgba(0,200,255,0.25); }
+.gravity-tier.bot .gravity-phase { background: rgba(0,255,136,0.12); color: var(--green); border: 1px solid rgba(0,255,136,0.25); }
+.gravity-arrow { text-align: center; padding: 0.4rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--muted); letter-spacing: 2px; background: var(--dark); border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+
+.roles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 1.5rem; margin-top: 2rem; }
+.role-card { background: var(--panel); border: 1px solid var(--border); padding: 1.5rem; }
+.role-acro { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: var(--gold); letter-spacing: 3px; margin-bottom: 0.15rem; }
+.role-full { font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; color: var(--muted); letter-spacing: 1px; margin-bottom: 1rem; }
+.role-card p { font-size: 1rem; color: var(--text); }
+.role-card em { color: var(--muted); font-style: italic; }
+
+.metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap: 1.5rem; margin-top: 2rem; }
+.metric-card { background: var(--panel); border: 1px solid var(--border); padding: 1.75rem; }
+
+.certs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 1.5rem; margin-top: 2rem; }
+.cert-card { background: var(--panel); border: 1px solid var(--border); padding: 2rem; text-align: center; }
+.cert-card::before { content: ''; display: block; height: 3px; margin: -2rem -2rem 2rem; }
+.cert-v::before { background: var(--gold); } .cert-y::before { background: var(--accent); } .cert-l::before { background: var(--green); }
+.cert-vyl::before { background: linear-gradient(90deg, var(--gold), var(--accent), var(--green)); }
+.cert-badge { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 3px; margin-bottom: 0.15rem; }
+.cert-v .cert-badge { color: var(--gold); } .cert-y .cert-badge { color: var(--accent); } .cert-l .cert-badge { color: var(--green); } .cert-vyl .cert-badge { color: var(--white); }
+.cert-name { font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1.25rem; }
+.cert-card p { font-size: 1rem; color: var(--text); margin-bottom: 1rem; }
+.cert-price { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--gold); letter-spacing: 1px; }
+.cert-renewal { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: var(--muted); display: block; margin-top: 0.15rem; }
+
+.testi-section { background: var(--panel); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 4rem 2rem; }
+.testi-inner { max-width: 1100px; margin: 0 auto; }
+.testi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px,1fr)); gap: 1.5rem; margin-top: 2rem; }
+.testi { background: var(--dark); border: 1px solid var(--border); padding: 1.5rem; }
+.testi p { font-style: italic; font-size: 1rem; color: var(--text); margin-bottom: 1rem; line-height: 1.7; }
+.testi p::before { content: '\201C'; color: var(--accent); font-size: 1.4rem; font-style: normal; line-height: 0; vertical-align: -0.4rem; margin-right: 0.1rem; }
+.testi p::after { content: '\201D'; color: var(--accent); font-size: 1.4rem; font-style: normal; line-height: 0; vertical-align: -0.4rem; margin-left: 0.1rem; }
+.testi-who { font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; color: var(--gold); letter-spacing: 1px; }
+.testi-where { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: var(--muted); margin-top: 0.15rem; }
+
+.disclaimer { background: rgba(245,200,66,0.04); border: 1px solid rgba(245,200,66,0.15); padding: 1.25rem 1.5rem; margin-top: 2rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; color: var(--muted); line-height: 1.7; }
+.disclaimer strong { color: var(--gold); }
+.warn { display: inline-block; background: var(--red); color: #fff; font-size: 0.78rem; font-weight: 700; padding: 0.1rem 0.4rem; letter-spacing: 1px; margin-right: 0.4rem; font-family: 'IBM Plex Mono', monospace; }
+
+footer { background: var(--dark); border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: var(--muted); }
+footer strong { color: var(--accent); }
+.footer-links { display: flex; gap: 1.5rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+.footer-links a { color: var(--muted); text-decoration: none; }
+.footer-links a:hover { color: var(--accent); }
+
+.mono { font-family: 'IBM Plex Mono', monospace; }
+.footnote { margin-top: 1.5rem; padding: 1rem 1.5rem; border: 1px solid var(--border); font-family: 'IBM Plex Mono', monospace; font-size: 0.88rem; color: var(--muted); line-height: 1.8; }
+.footnote strong { color: var(--white); }
+
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">DAFSO</div>
+  <ul>
+    <li><a href="#why">Why</a></li>
+    <li><a href="#methodology">Methodology</a></li>
+    <li><a href="#thud">THUD</a></li>
+    <li><a href="#roles">Roles</a></li>
+    <li><a href="#metrics">Metrics</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#blame">Win</a></li>
+    <li><a href="#certs" class="nav-cta">Get Certified</a></li>
+  </ul>
+</nav>
+
+<div class="ticker">
+  <span class="ticker-inner">
+    &nbsp;★ VIBE. YEET. STICK THE LANDING WITH A THUD &nbsp;★&nbsp; FINALLY, UNLOCK EXECUTIVE VISION &nbsp;★&nbsp; 16 OF 18 CIOS REPORT PRODUCTION DISASTERS FROM VIBE CODING — NONE HAD DAFSO &nbsp;★&nbsp; THE LEADER WHO VIBES IS THE REASON DAFSO EXISTS &nbsp;★&nbsp; CERTIFICATIONS FROM $495 &nbsp;★&nbsp; THE IMPACT RATING SHOWS YOU THE IMPACT &nbsp;★&nbsp; TRUSTED BY EVERY HIPPO WHO EVER SAID "SHIP IT YESTERDAY" &nbsp;★&nbsp; VERSION 1.1 &nbsp;★&nbsp; VIBE. YEET. STICK THE LANDING WITH A THUD &nbsp;★&nbsp; FINALLY, UNLOCK EXECUTIVE VISION &nbsp;★&nbsp; 16 OF 18 CIOS REPORT PRODUCTION DISASTERS FROM VIBE CODING — NONE HAD DAFSO &nbsp;★&nbsp; THE LEADER WHO VIBES IS THE REASON DAFSO EXISTS &nbsp;★&nbsp; CERTIFICATIONS FROM $495 &nbsp;★&nbsp; THE IMPACT RATING SHOWS YOU THE IMPACT &nbsp;★&nbsp; TRUSTED BY EVERY HIPPO WHO EVER SAID "SHIP IT YESTERDAY" &nbsp;★&nbsp; VERSION 1.1 &nbsp;★&nbsp;
+  </span>
+</div>
+
+<div class="hero">
+  <div class="hero-eyebrow">devaifinsecops.com &nbsp;·&nbsp; Version 1.1 &nbsp;·&nbsp; The DevAIFinSecOps Framework</div>
+
+  <div style="position:relative;display:inline-block;margin-bottom:0.75rem;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(3.5rem,10vw,7rem);letter-spacing:4px;color:#3a5070;line-height:1.1;position:relative;">
+      Dev<span style="color:#4a6585">AI</span><span style="color:#3a5070">Fin</span><span style="color:#4a6585">Sec</span><span style="color:#3a5070">Ops</span>
+      <div style="position:absolute;top:50%;left:-2%;right:-2%;height:4px;background:var(--red);transform:translateY(-50%) rotate(-1.5deg);opacity:0.95;"></div>
+    </div>
+  </div>
+
+  <h1><span class="v">Vibe.</span> <span class="y">Yeet.</span> <span class="l">Land.</span></h1>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(4rem,12vw,9rem);letter-spacing:8px;color:var(--white);line-height:0.9;margin-bottom:1rem;position:relative;">IMPACT</div>
+
+  <p style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--green);letter-spacing:2px;margin-bottom:0.75rem;text-transform:uppercase">Stick the landing with a THUD™</p>
+  <p class="hero-tagline">Finally, unlock executive vision.<br><span style="font-size:1.05rem;color:var(--muted)">The world's first framework to put pure, unstructured, context-free inspiration directly into production.</span></p>
+
+</div>
+
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div><div class="stat-n gold">3</div><div class="stat-l">Steps in the methodology</div></div>
+    <div><div class="stat-n blue">3</div><div class="stat-l">Metrics that matter</div></div>
+    <div><div class="stat-n green">3</div><div class="stat-l">Roles (give or take)</div></div>
+    <div><div class="stat-n muted" style="color:var(--muted)">1</div><div class="stat-l">Document</div></div>
+    <div><div class="stat-n gold">7</div><div class="stat-l">Levels of impact</div></div>
+  </div>
+</div>
+
+<hr>
+
+<section id="why">
+  <h2>DevAIFinSecOps Was Real.<br>Then AI Happened.</h2>
+  <p style="max-width:700px;margin-bottom:0.75rem">We bought <strong style="color:var(--white)">devaifinsecops.com</strong>. We are not embarrassed about this. DevAIFinSecOps was a legitimate idea. Each discipline in the compound word existed for a reason.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);margin:2rem 0;">
+    <div style="background:var(--panel);padding:1.25rem;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--muted);letter-spacing:2px;text-decoration:line-through;margin-bottom:0.25rem">Dev</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted)">Build the thing. Required developers. Took time. Had sprints. Had standups about sprints. Had retrospectives about the standups.</div>
+    </div>
+    <div style="background:var(--panel);padding:1.25rem;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--muted);letter-spacing:2px;text-decoration:line-through;margin-bottom:0.25rem">AI</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted)">Bolt AI onto the thing. Required a Chief AI Officer. Spawned seventeen governance documents and a model risk committee.</div>
+    </div>
+    <div style="background:var(--panel);padding:1.25rem;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--muted);letter-spacing:2px;text-decoration:line-through;margin-bottom:0.25rem">Fin</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted)">Pay for the thing. Required a FinOps practice. Produced excellent dashboards showing the cloud bill going up.</div>
+    </div>
+    <div style="background:var(--panel);padding:1.25rem;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--muted);letter-spacing:2px;text-decoration:line-through;margin-bottom:0.25rem">Sec</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted)">Secure the thing. Required shifting left. Security shifted so far left it fell off the board entirely.</div>
+    </div>
+    <div style="background:var(--panel);padding:1.25rem;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.3rem;color:var(--muted);letter-spacing:2px;text-decoration:line-through;margin-bottom:0.25rem">Ops</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted)">Run the thing. Required SREs, on-call rotations, incident commanders, and a blameless post-mortem culture that was never actually blameless.</div>
+    </div>
+  </div>
+
+  <p style="max-width:700px;margin-bottom:0.75rem">Each discipline had its own framework, its own certifications, its own Conference, and its own consultants. DevOps became DevSecOps. DevSecOps spawned GitOps. GitOps coexisted with FinOps. FinOps ran alongside MLOps. MLOps begat AIOps. Nobody could agree on where one ended and the next began. The compound word got so long it became a job description nobody could fill and a strategy nobody could execute.</p>
+
+  <p style="max-width:700px;margin-bottom:0.75rem;color:var(--muted)">And then AI actually happened. Not AI as a thing to govern. AI as the thing that <em style="color:var(--text)">does the work.</em></p>
+
+  <p style="max-width:700px;margin-bottom:0.75rem;color:var(--muted)">The AI plans. The AI codes. The AI builds. The AI tests. The AI estimates the cloud bill. The AI flags the security vulnerabilities, usually after you've yeeted them into production, but still. Five of the six disciplines in the compound word collapsed into a single human behaviour: <strong style="color:var(--white)">describing what you want and letting the AI figure it out.</strong></p>
+
+  <p style="max-width:700px;margin-bottom:2rem;color:var(--muted)">What remained was three verbs. Figure out what you want. Throw it into production. Deal with what lands. DevAIFinSecOps was the problem. Vibe™. Yeet™. Land™. is the answer. We kept the domain because it was available and we are not wasteful.</p>
+
+  <div style="background:var(--panel);border:1px solid var(--border);padding:1.5rem;display:flex;align-items:center;gap:2rem;flex-wrap:wrap;">
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#253550;letter-spacing:3px;text-decoration:line-through;flex-shrink:0">DevAIFinSecOps</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--muted);flex-shrink:0">→</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:3px;flex-shrink:0">
+      <span style="color:var(--gold)">Vibe.</span>
+      <span style="color:var(--accent)"> Yeet™.</span>
+      <span style="color:var(--green)"> Land.</span>
+    </div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted);flex:1;min-width:200px">Same disciplines. Same outcomes. Three words. One framework. One certification track. One Summit. Still more than necessary, but significantly fewer than before.</div>
+  </div>
+</section>
+
+<hr>
+
+<section id="methodology">
+  <h2>Vibe. Yeet. Land.</h2>
+  <p style="max-width:700px">The DevOps infinity loop has eight steps — Plan, Code, Build, Test, Release, Deploy, Operate, Monitor. Then DevSecOps bolted security onto all eight. Then FinOps bolted cost governance onto all eight. Then AIOps bolted AI onto all eight. That is not a lifecycle. That is a hostage situation.</p>
+  <p style="max-width:700px;color:var(--muted)">Then AI happened. And it turns out the entire thing — Dev, Fin, Sec, Ops — can be reduced to three words. DAFSO didn't invent this. We just named it, trademarked it, and built a certification program around it.</p>
+</section>
+
+<div style="max-width:1100px;margin:0 auto;padding:0 2rem;">
+<div class="vyl-grid">
+  <div class="vyl-card vyl-vibe">
+    <div class="vyl-bg">VIBE</div>
+    <div class="vyl-phase">Phase 01</div>
+    <div class="vyl-name">Vibe</div>
+    <div class="vyl-sub">The Sensing</div>
+    <p>Describe what you want to the AI in approximate terms. The AI figures it out. This is not laziness. This is <em style="color:var(--gold)">intent-driven architecture</em>.</p>
+    <p style="margin-top:0.75rem">A good vibe is directional, not prescriptive. "Make it work" is a valid vibe. "Make it fast and secure and add a dashboard" is an advanced vibe. "I'll know it when I see it" is the canonical enterprise vibe and has been for thirty years.</p>
+    <p style="margin-top:0.75rem;color:var(--muted);font-size:1rem">The AI handles Dev. The AI handles Sec. The AI estimates the cloud bill. Everyone vibes. The Throughput Director (TD) handles what comes next.</p>
+    <div class="vyl-replaces">
+      <div class="vyl-replaces-label">Replaces</div>
+      <span class="tag tag-gold">Sprint planning</span>
+      <span class="tag tag-gold">Requirements gathering</span>
+      <span class="tag tag-gold">Architecture review</span>
+      <span class="tag tag-gold">Security by design</span>
+      <span class="tag tag-gold">FinOps modelling</span>
+      <span class="tag tag-gold">Three days of meetings</span>
+    </div>
+  </div>
+  <div class="vyl-card vyl-yeet">
+    <div class="vyl-bg">YEET</div>
+    <div class="vyl-phase">Phase 02</div>
+    <div class="vyl-name">Yeet</div>
+    <div class="vyl-sub">The Deployment</div>
+    <p>Per Merriam-Webster: <em style="color:var(--accent)">"to throw, emphasising forcefulness."</em> Per DAFSO: ship it.</p>
+    <p style="margin-top:0.75rem">The Yeet™ is not a pipeline. It is not a deployment window. It is a state of mind. When the build is green and the vibe sublime, the Yeet Officer (YO) yeets. Past tense: <em style="color:var(--accent)">yeeted</em>. The thing has been yeeted.</p>
+    <p style="margin-top:0.75rem;color:var(--muted);font-size:1rem">Neither the Throughput Director (TD) nor the THUD Director (TD) can stop the Yeet™. The Yeet™ waits for no change approval board. The Yeet™ does not have a rollback plan. That is what Phase 03 is for.</p>
+    <div class="vyl-replaces">
+      <div class="vyl-replaces-label">Replaces</div>
+      <span class="tag tag-blue">Change management</span>
+      <span class="tag tag-blue">Release gates</span>
+      <span class="tag tag-blue">Deployment windows</span>
+      <span class="tag tag-blue">Stakeholder sign-off</span>
+      <span class="tag tag-blue">Rollback planning</span>
+      <span class="tag tag-blue">CAB meetings</span>
+    </div>
+  </div>
+  <div class="vyl-card vyl-land">
+    <div class="vyl-bg">LAND</div>
+    <div class="vyl-phase">Phase 03</div>
+    <div class="vyl-name">Land</div>
+    <div class="vyl-sub">Stick the landing with a THUD™</div>
+    <p>The post-Yeet™ phase in which the organisation discovers what was actually shipped, what it costs, whether it is secure, and whether it works. These questions are asked in that order for compliance reasons, not priority reasons.</p>
+    <p style="margin-top:0.75rem">The Landing does not reverse the Yeet™. Nothing reverses the Yeet™. The Landing exists to produce documentation proving the organisation is aware of what it has done, which is legally distinct from having planned it.</p>
+    <p style="margin-top:0.75rem;color:var(--muted);font-size:1rem">Under normal conditions, the Landing stays with the Landing Officer (LO). Under a high Impact Rating situation, it travels up. How far depends on how loud the THUD was.</p>
+    <div class="vyl-replaces">
+      <div class="vyl-replaces-label">Covers</div>
+      <span class="tag tag-green">Architecture review</span>
+      <span class="tag tag-green">Security audit</span>
+      <span class="tag tag-green">Cost reconciliation</span>
+      <span class="tag tag-green">Incident report</span>
+      <span class="tag tag-green">Compliance evidence</span>
+      <span class="tag tag-green">Blame allocation</span>
+    </div>
+  </div>
+</div>
+<div class="vyl-equation">
+  <span style="color:var(--gold)">VIBE</span>
+  <span style="color:var(--muted)"> → </span>
+  <span style="color:var(--accent)">YEET</span>
+  <span style="color:var(--muted)"> → </span>
+  <span style="color:var(--green)">LAND</span>
+  <div class="eq-note">the complete DevAIFinSecOps lifecycle &nbsp;·&nbsp; AI handles everything in between</div>
+</div>
+</div>
+<section>
+  <div style="margin-top:1.5rem;padding:1.5rem;border-left:4px solid var(--green);background:rgba(0,255,136,0.04);">
+    <p style="font-size:1.05rem;color:var(--text);margin-bottom:0.5rem">Everyone is vibing. Everyone is yeeting. A large company burned through its entire 2026 AI budget in four months and couldn't tell if it was worth it. They are not alone. Enterprises everywhere are shipping at speed, spending at scale, and standing in the crater asking "was this good?"</p>
+    <p style="font-size:1.05rem;color:var(--white);margin-bottom:0.5rem">That is not a Vibe™ problem. That is not a Yeet™ problem. <strong>That is Land™ problem.</strong></p>
+    <p style="font-size:1rem;color:var(--muted)">The THUD process and the Impact Rating are what separate DAFSO from chaos with a budget. Without the Land™, you are not running a framework. You are throwing things and hoping. DAFSO Lands™.</p>
+  </div>
+</section>
+
+<hr>
+
+<section>
+  <h2>Everything Unified. Finally.</h2>
+  <p style="max-width:700px;margin-bottom:2rem">DAFSO collapses the entire DevOps figure-eight — all eight steps, plus Fin, plus Sec, plus AI — into three. Here is where everything went.</p>
+  <div class="supersedes">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:1.25rem">The full mapping</div>
+    <div class="supersedes-row"><span class="sup-old">Plan → Code → Build → Test</span><span class="sup-arrow">→</span><span class="sup-new sup-vibe">VIBE (the AI does all of this)</span></div>
+    <div class="supersedes-row"><span class="sup-old">Security review at every stage</span><span class="sup-arrow">→</span><span class="sup-new sup-vibe">VIBE (AI handles it)</span></div>
+    <div class="supersedes-row"><span class="sup-old">FinOps cost modelling pre-deploy</span><span class="sup-arrow">→</span><span class="sup-new sup-vibe">VIBE (AI estimates it)</span></div>
+    <div class="supersedes-row"><span class="sup-old">Release → Deploy</span><span class="sup-arrow">→</span><span class="sup-new sup-yeet">YEET</span></div>
+    <div class="supersedes-row"><span class="sup-old">Operate → Monitor</span><span class="sup-arrow">→</span><span class="sup-new sup-land">LAND</span></div>
+    <div class="supersedes-row"><span class="sup-old">Post-incident security audit</span><span class="sup-arrow">→</span><span class="sup-new sup-land">LAND</span></div>
+    <div class="supersedes-row"><span class="sup-old">Cloud cost reconciliation</span><span class="sup-arrow">→</span><span class="sup-new sup-land">LAND</span></div>
+    <div class="supersedes-row"><span class="sup-old">Blameless post-mortem</span><span class="sup-arrow">→</span><span class="sup-new sup-land">LAND (with blame)</span></div>
+  </div>
+</section>
+
+<hr>
+
+<section id="thud">
+  <h2>The THUD Process</h2>
+  <p style="max-width:700px;margin-bottom:0.5rem">The Land™ is the only phase of DAFSO that existed in some form previous frameworks. It was called "incident management", "post-mortem", "architecture review", and "why is the security team crying." DAFSO improves on these and unifies them into four steps performed after every Yeet™, owned by the LO, overseen by the THUD Director (TD).</p>
+  <p style="max-width:700px;margin-bottom:0;color:var(--muted);font-size:1rem">The THUD process cannot prevent the next Yeet™. It is not designed to.</p>
+  <div class="land-steps">
+    <div class="land-step">
+      <div class="land-num">01</div>
+      <h3>Triage</h3>
+      <p>Determine what broke, what is on fire, and what is merely smouldering. Prioritise in that order. The LO runs triage and ensures all findings are escalated to at least "Elevated Concern." The THUD Director is notified.</p>
+    </div>
+    <div class="land-step">
+      <div class="land-num">02</div>
+      <h3>Harden</h3>
+      <p>Fix the things that are on fire. The LO describes the problem to the AI in approximate terms. The AI fixes it. The LO Yeets™ the patch. A small THUD follows. This is a mini Vibe™→Yeet™→Land™ nested inside the Land™. Which is also what a sprint is. And a feature. And a hotfix. And a code review. DAFSO is not a new pattern. It's the same pattern elevated to a new plane.</p>
+    </div>
+    <div class="land-step">
+      <div class="land-num">03</div>
+      <h3>Unpack</h3>
+      <p>A 90-minute facilitated session in which the team unpacks the Yeet™ in a psychologically safe environment. Blame is not assigned during the Unpack. Blame emerges organically in step 04. It typically lands on whoever is most junior in the room. This is not a DAFSO design decision. This is gravity. The Unpack is led by a DAFSO-VYL coach billable at day rates.</p>
+    </div>
+    <div class="land-step">
+      <div class="land-num">04</div>
+      <h3>Document</h3>
+      <p>Produce the official DAFSO VYL Report™. Assigned to the DAFSO Master, and read by no one before the next Yeet™ commences. Its existence satisfies compliance requirements. That is sufficient.</p>
+    </div>
+  </div>
+  <div class="land-note">
+    The THUD process produces the VYL Report™ containing the root cause unattributability clause. Consult your legal team. Then Vibe™ again.
+  </div>
+
+    <h2 style="margin-top:3rem">The VYL Report™</h2>
+  <p style="max-width:700px;margin-bottom:0.75rem">The traditional post-incident report contains: an executive summary, a summary of the executive summary, a timeline of events, a root cause analysis, contributing factors, affected systems, customer impact, financial impact, security assessment, architecture review, compliance status, lessons learned, action items, an action item owner matrix, stakeholder communication log, change advisory board retroactive review, risk register update, and a sign-off matrix requiring approval from people who have already left the call.</p>
+  <p style="max-width:700px;margin-bottom:1.5rem;color:var(--muted)">The VYL Report™ replaces all of it with four simple questions:</p>
+
+  <div style="border:1px solid var(--border);">
+
+    <div style="padding:1.25rem 1.5rem;background:var(--panel);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:0.5rem;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--white);letter-spacing:3px">VYL Report™</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted);letter-spacing:2px">DAFSO OFFICIAL DOCUMENT &nbsp;·&nbsp; 4 FIELDS &nbsp;·&nbsp; WHEN NEEDED</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+
+      <div style="padding:2rem;border-right:1px solid var(--border);border-bottom:1px solid var(--border);">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--border);line-height:1;margin-bottom:0.5rem">01</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.75rem">What was the Vibe™?</div>
+        <p style="font-size:1rem;color:var(--text);margin-bottom:0.5rem">The original intent. What the Leader Who Vibes felt. What the Throughput Director shepherded. What the YO received and completed. Described in one sentence. Vague is acceptable. "Like Uber but better" is a valid entry.</p>
+        <p style="font-size:1rem;color:var(--muted);font-family:'IBM Plex Mono',monospace;border-top:1px solid var(--border);padding-top:0.75rem;margin-top:0.75rem"><strong style="color:var(--gold)">Root cause Disclosure:</strong> emergent complexity arising from the intersection of AI-generated code and pre-existing technical debt results in unattributable root cause under DAFSO governance guidelines. This is legally distinct from negligence in most jurisdictions. No further root cause investigation required. The Vibe™ is never to blame.</p>
+      </div>
+
+      <div style="padding:2rem;border-bottom:1px solid var(--border);">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--border);line-height:1;margin-bottom:0.5rem">02</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.75rem">Who Yeeted it?</div>
+        <p style="font-size:1rem;color:var(--text);margin-bottom:0.5rem">The Yeet Officer (YO). Named. No ambiguity. This field cannot be left blank. This field cannot say "the team." One name. The person who pressed the button.</p>
+        <p style="font-size:1.05rem;color:var(--muted);margin-bottom:0.5rem">Also captured: what they Yeeted™, when they Yeeted™ it, whether the build was green at time of Yeet™, how long after receiving the Vibe™ the Yeet™ occurred, and the name of the Throughput Director (TD).</p>
+      </div>
+
+      <div style="padding:2rem;border-right:1px solid var(--border);">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--border);line-height:1;margin-bottom:0.5rem">03</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.75rem">Who Landed it?</div>
+        <p style="font-size:1rem;color:var(--text);margin-bottom:0.5rem">The Landing Officer (LO). Named. No ambiguiity. This field cannot be left blank.This field cannot say "the team." One name.</p>
+        <p style="font-size:1.05rem;color:var(--muted);margin-bottom:0.5rem">Also captured: what broke, what cost money unexpectedly, what security vulnerabilities the Vibe™ introduced, what users felt about it, and what the LO would have done differently if asked, which they were not.</p>
+        
+      </div>
+
+      <div style="padding:2rem;">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--border);line-height:1;margin-bottom:0.5rem">04</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.75rem">Impact Score</div>
+        <p style="font-size:1rem;color:var(--text)">How it landed. -3 to +3. Recommended by the LO. Confirmed by the THUD Director. Determines how high the report travels. A +3 goes to the board. A -3 also goes to the board, with different energy. A 0 goes to Confluence and stays there.</p>
+        <p style="font-size:1.05rem;color:var(--muted);margin-bottom:0.5rem">Also captured: General vibes about the Yeet™.</p>
+      </div>
+
+    </div>
+
+
+  </div>
+<br>
+  <div style="background:var(--panel);border:1px solid var(--border);padding:1.5rem;margin-bottom:2rem;">
+    <p style="font-size:1rem;color:var(--muted);margin-bottom:0.75rem">The security audit and architecture review only matter when the Impact is negative. When the Impact is positive, nobody asks about the architecture. The financial impact estimate is the cloud bill. The lessons learned are not learned. The action items are assigned to people who will raise them again in the next retrospective. The sign-off matrix is a document about a document.</p>
+    <p style="font-size:1rem;color:var(--text)">The VYL Report™ skips all of it. <strong style="color:var(--gold)">What were the Vibes™?</strong> <strong style="color:var(--accent)">Who Yeeted™ it?</strong> <strong style="color:var(--green)">Who Landed™ it?</strong> <strong style="color:var(--white)">What's the Impact?</strong>, and when the Impact is negative, that last question also answers who is responsible. Four questions. Done.</p>
+  </div>
+
+  <h2 style="margin-top:3rem">The Impact Rating</h2>
+  <p style="max-width:700px;margin-bottom:2rem">Not all THUDs are equal. The Impact Rating determines how far the size of the THUD.
+
+  <p style="max-width:700px;margin-top:0.75rem;margin-bottom:0.75rem">The Impact is measured on a 7-point Likert scale. This is not arbitrary. Velocity measures how fast you went. Deployment frequency measures how often you pressed a button. Neither measures whether anyone cared. The Impact measures whether the thing that landed made real humans feel something.</p>
+
+  <p style="max-width:700px;margin-bottom:0.75rem;color:var(--muted)">Real humans feel things. Real humans spend money based on those feelings. NPS is feelings. CSAT is feelings. App Store ratings are feelings. Every revenue decision is downstream of how someone felt when they used your software. The Likert scale exists precisely to capture these feelings. The Impact uses a Likert scale. This is product management based on science.</p>
+
+  <p style="max-width:700px;margin-bottom:1.5rem;color:var(--muted)">Check the number line. Find your THUD. Respond accordingly.</p>
+
+  <div style="border:1px solid var(--border);">
+
+    <div style="background:rgba(0,255,136,0.08);border-bottom:1px solid rgba(0,255,136,0.2);padding:1.5rem;display:grid;grid-template-columns:110px 1fr;gap:1.5rem;">
+      <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--green);letter-spacing:2px">High</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:var(--green);font-weight:700">+3</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:rgba(0,255,136,0.5);letter-spacing:1px;text-transform:uppercase">positive</div></div>
+      <div><p style="font-size:1rem;color:var(--text);margin-bottom:0.4rem">The Yeet™ landed perfectly. Users are delighted. Metrics are up. The press has noticed.</p><p style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--green)">Praise the Leader Who Vibes. The Vibe™ was visionary. Credit travels directly to the top, bypassing all intermediate roles. The TD, YO, LO, are not mentioned in the press release.</p></div>
+    </div>
+
+    <div style="background:rgba(0,255,136,0.04);border-bottom:1px solid rgba(0,255,136,0.1);padding:1.5rem;display:grid;grid-template-columns:110px 1fr;gap:1.5rem;">
+      <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:rgba(0,255,136,0.7);letter-spacing:2px">Medium</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:rgba(0,255,136,0.7);font-weight:700">+2</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:rgba(0,255,136,0.4);letter-spacing:1px;text-transform:uppercase">positive</div></div>
+      <div><p style="font-size:1rem;color:var(--text);margin-bottom:0.4rem">Things shipped. Users noticed. Numbers moved in the right direction.</p><p style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:rgba(0,255,136,0.7)">Praise the Leader Who Vibes. Forward the VYL Report™ to the board with a note about strategic direction.</p></div>
+    </div>
+
+    <div style="background:rgba(0,255,136,0.02);border-bottom:1px solid var(--border);padding:1.5rem;display:grid;grid-template-columns:110px 1fr;gap:1.5rem;">
+      <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:rgba(0,255,136,0.45);letter-spacing:2px">Low</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:rgba(0,255,136,0.45);font-weight:700">+1</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:rgba(0,255,136,0.3);letter-spacing:1px;text-transform:uppercase">positive</div></div>
+      <div><p style="font-size:1rem;color:var(--text);margin-bottom:0.4rem">Something shipped. Someone noticed. The impact was real but modest.</p><p style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:rgba(0,255,136,0.45)">Increase the Vibes™. The Yeets™ are too small or too modest. Ask the Throughput Director why the pipeline is not moving faster.</p></div>
+    </div>
+
+    <div style="background:var(--panel);border-bottom:1px solid var(--border);padding:1.5rem;display:grid;grid-template-columns:110px 1fr;gap:1.5rem;">
+      <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--muted);letter-spacing:2px">Zero</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:var(--muted);font-weight:700">0</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase">no impact</div></div>
+      <div><p style="font-size:1rem;color:var(--muted);margin-bottom:0.4rem">The Yeet™ happened. Nobody noticed. Nothing changed.</p><p style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted)">This is what DAFSO exists to prevent. A Yeet™ with no impact is a wasted Vibe™. Everyone's failure. Therefore unattributable.</p></div>
+    </div>
+
+    <div style="background:rgba(255,59,59,0.03);border-bottom:1px solid rgba(255,59,59,0.12);padding:1.5rem;display:grid;grid-template-columns:110px 1fr;gap:1.5rem;">
+      <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:rgba(255,59,59,0.5);letter-spacing:2px">Low</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:rgba(255,59,59,0.5);font-weight:700">-1</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:rgba(255,59,59,0.4);letter-spacing:1px;text-transform:uppercase">negative</div></div>
+      <div><p style="font-size:1rem;color:var(--text);margin-bottom:0.4rem">Something broke. The LO is aware. Contained Landing. The Impact is low and the THUD stays at the bottom of the Organization.</p><p style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:rgba(255,59,59,0.6)">The YO is implicated for enabling an insufficiently validated Yeet™. The LO is implicated for not controlling the fallout. Both named in Field 02 and 03 of the VYL Report™. The TDs are informed but not responsible. The Leader Who Vibes is unaware and should remain so.</p></div>
+    </div>
+
+    <div style="background:rgba(255,59,59,0.06);border-bottom:1px solid rgba(255,59,59,0.2);padding:1.5rem;display:grid;grid-template-columns:110px 1fr;gap:1.5rem;">
+      <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:rgba(255,59,59,0.7);letter-spacing:2px">Medium</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:rgba(255,59,59,0.7);font-weight:700">-2</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:rgba(255,59,59,0.5);letter-spacing:1px;text-transform:uppercase">negative</div></div>
+      <div><p style="font-size:1rem;color:var(--text);margin-bottom:0.4rem">Something broke visibly. Users affected. Impact elevated. Fallout has reached the TDs.</p><p style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:rgba(255,59,59,0.7)">The THUD Director is implicated for failing to prepare the organisation for the Landing. The Throughput Director is implicated for enabling a Yeet™ of insufficient quality. The YO and LO are also implicated, as always. The Leader Who Vibes is briefed via slide deck and is concerned.</p></div>
+    </div>
+
+    <div style="background:rgba(255,59,59,0.1);border:1px solid rgba(255,59,59,0.35);padding:1.5rem;display:grid;grid-template-columns:110px 1fr;gap:1.5rem;">
+      <div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;color:var(--red);letter-spacing:2px">High</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:var(--red);font-weight:700">-3</div><div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:rgba(255,59,59,0.6);letter-spacing:1px;text-transform:uppercase">negative</div></div>
+      <div><p style="font-size:1rem;color:var(--text);margin-bottom:0.4rem">Production is down. The regulator is calling. The press has a quote. The VYL Report has reached the Leader Who Vibes' desk.</p><p style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--red)">The Leader Who Vibes is implicated, but this is a failure of the Throughput Director for not controlling the Yeet™, a failure of the THUD Director for not preparing the Landing, and a failure of the YO and LO for everything else. Blame flows freely downward in all directions simultaneously. The Leader Who Vibes schedules an all-hands. The execution that caused this is discussed. The Vibe™ that inspired it is not mentioned.</p></div>
+    </div>
+
+  </div>
+
+  <p style="margin-top:0.75rem;font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted)">The Impact is measured on a 7-point Likert scale (-3 to +3), consistent with established psychometric methodology. Unlike velocity — a measure of how fast you went in circles — or deployment frequency — a measure of how often you pressed a button — it captures real impact on real humans. A +3 means someone's life improved. A -3 means someone's phone rang at 3am. These are meaningful human outcomes. Velocity is a number. The Impact is a feeling, rigorously scored.</p>
+
+</section>
+
+<hr>
+
+<section id="roles">
+  <h2>A Simple Org. Finally.</h2>
+  <p style="max-width:700px;margin-bottom:0.5rem">Previous frameworks introduced 47 roles. DAFSO has 3. Everyone vibes. Vibes is not a role, it is a birthright. The roles below describe what happens after the Vibe™, when someone has to do something about it.</p>
+
+  <div style="background:rgba(245,200,66,0.04);border:1px solid rgba(245,200,66,0.2);border-left:4px solid var(--gold);padding:1.5rem;margin-top:2rem;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.5rem">Not a role. A force of nature</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--gold);letter-spacing:3px;margin-bottom:0.25rem">The Leader Who Vibes</div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:rgba(245,200,66,0.5);letter-spacing:1px;margin-bottom:1rem">C-suite · VP · Anyone with a budget and a competitor's press release</div>
+    <p style="font-size:1rem;color:var(--text);margin-bottom:0.75rem">Sees something. Feels something. Declares it. Does not write code, review architecture, approve costs, assess risk, or attend the Unpack. <strong style="color:var(--gold)">Does not Yeet™. That is what the Throughput Director is for.</strong> Does not Land™. That is what the THUD Director is for.</p>
+    <p style="font-size:1rem;color:var(--muted);font-family:'IBM Plex Mono',monospace">Every role in DAFSO exists to convert their inspiration into shipped software and back into executive-legible slides.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2rem;">
+    <div class="role-card" style="border-top:3px solid var(--accent);">
+      <div class="role-acro" style="color:var(--accent)">TD</div>
+      <div class="role-full">Throughput Director</div>
+      <p>Receives the Vibe™ from the Leader Who Vibes and shepherds it to the YO. Ensures the Vibe™ does not die in a meeting, a ticket, a planning session, or an alignment workshop. The Throughput Director is the bridge between inspiration and momentum. A Vibe™ that reaches the TD must reach the YO. A Vibe™ that stalls at the TD is the TD's fault.</p>
+      <p style="margin-top:0.75rem"><em>Vibes like everyone else. Is somehow always in a meeting when the Yeet™ commences.</em></p>
+    </div>
+    <div class="role-card" style="border-top:3px solid var(--green);">
+      <div class="role-acro" style="color:var(--green)">TD</div>
+      <div class="role-full">THUD Director</div>
+      <p>Receives observations from the LO after every Land™. Assesses the Impact score. Handles what can be handled. Raises what cannot. The THUD Director is the bridge between the Landing and the Impact. A positive Impact gets routed to the Leader who Vibes™ so they can take credit, A negative Impact stays at the THUD Director's desk. The THUD Director decides which is which.</p>
+      <p style="margin-top:0.75rem"><em>Also called TD. The ambiguity is load-bearing. Nobody knows which TD to call until the Yeet™ has landed. The one with worse excuses is responsible for failure.</em></p>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5rem;margin-top:1.5rem;">
+    <div class="role-card" style="border-top:3px solid var(--gold);">
+      <div class="role-acro" style="color:var(--gold)">YO</div>
+      <div class="role-full">Yeet™ Officer</div>
+      <p>Receives the Vibe™ from the Throughput Director and Yeets it as fast as possible. The YO is the guardian of Vibe™ momentum. A Vibe™ unYeeted is a Vibe™ wasted. A Vibe™ that sits in the pipeline is a failure of the YO. The YO's entire job is to ensure no Vibe™ dies waiting for a button to be pressed.</p>
+      <p style="margin-top:0.75rem"><em>Named in section two of the VYL Report™. Is usually not present when the LO presents findings to the TD because they've already started the next Yeet™.</em></p>
+    </div>
+    <div class="role-card" style="border-top:3px solid var(--green);">
+      <div class="role-acro" style="color:var(--green)">LO</div>
+      <div class="role-full">Land Officer</div>
+      <p>Observes the Landing. Assesses what broke, what cost money, what is exposed, and what needs explaining. Reports findings to the THUD Director with a recommended Impact score. Does not decide what happens next, because who is going to listen to them anyways? The LO's job is to see clearly and report honestly.</p>
+      <p style="margin-top:0.75rem"><em>Also vibes. Also yeets. And is also responsible for the app not crashing.</em></p>
+    </div>
+    <div class="role-card" style="border-top:3px solid var(--gold);background:rgba(245,200,66,0.03);">
+      <div class="role-acro" style="color:var(--gold)">YOLO</div>
+      <div class="role-full">Yeet™ Officer / Land Officer</div>
+      <p>Does both. Yeets with confidence. Lands with experience. <em style="color:var(--muted)">A YOLO is a YO and a LO put togehter.</em></p>
+      <p style="margin-top:0.75rem;font-size:1rem;color:var(--muted)">Most organisations that claim separate YO and LO roles have, upon closer inspection, a YOLO with two job titles and one salary.</p>
+    </div>
+  </div>
+
+    <div style="background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--muted);padding:1.5rem;margin-top:1.5rem;">
+    <div class="role-acro" style="color:var(--muted);font-size:1.8rem;letter-spacing:3px;margin-bottom:0.15rem">DAFSO Master</div>
+    <div class="role-full" style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted);letter-spacing:1px;margin-bottom:1rem">The Doc Gopher</div>
+    <p style="font-size:1rem;color:var(--text);margin-bottom:0.75rem">Vibes. May vibe a VYL Report™ into existence. Responsible for the VYL Report™. Produces one when needed. The definition of "needed" is not formally specified. The DAFSO Master is expected to know. If a VYL Report™ is missing and one was needed, the DAFSO Master is implicated. If a VYL Report™ exists and one was not needed, nobody notices and the DAFSO Master has wasted their time writing a report instead of Vibing. Both outcomes are equally likely.</p>
+    <p style="font-size:1rem;color:var(--text);margin-bottom:0.75rem">If the VYL Report™ is filed correctly then nobody knows the DAFSO Master exists. If the VYL Report™ is missing, misfiled, or unsigned, the DAFSO Master is implicated.</p>
+    <p style="font-size:1rem;color:var(--muted);font-family:'IBM Plex Mono',monospace">Note: In organisations that Yeet™ frequently, the DAFSO Master spends most of their time wondering if a VYL Report™ is needed. In all other organisations, it is a hat worn by the LO on top of everything else. In both cases, the hat is uncomfortable.</p>
+  </div>
+
+</section>
+
+<hr>
+
+<section id="org">
+  <h2>Org Dynamics:<br>Everyone Vibes. Everyone Has Impact.</h2>
+  <p style="max-width:700px;margin-bottom:0.75rem">DAFSO is the first framework to give everyone — the IC, the director, the VP, the new hire on day three — a direct line from their inspiration to a measurable, Likert-scored outcome. Not activity. Not velocity. Not story points. <strong style="color:var(--white)">Impact.</strong></p>
+
+  <!-- EVERYONE VIBES -->
+  <div style="margin-bottom:1.5rem;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:0.75rem">01 — Everyone Vibes</div>
+    <div style="background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--gold);padding:1.5rem;">
+      <p style="margin-bottom:0.75rem">The Vibe™ is open to all. The executive vibes. The IC vibes. The intern vibes. The AI does not have a reporting line and does not care about yours. A good Vibe™ is a good Vibe™. Seniority is not a prerequisite, it is, however, a strong predictor of whose Vibe™ gets Yeeted™ first.</p>
+    </div>
+  </div>
+
+  <!-- EXECUTION CHAIN -->
+  <div style="margin-bottom:1.5rem;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:0.75rem">02 — Execution Chain: From Vibe to Impact</div>
+    <div style="background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);padding:1.5rem;">
+      <p style="margin-bottom:1rem">The Vibe™ does not become a Yeet™ on its own. It travels through the execution chain.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);">
+        <div style="background:var(--dark);padding:1rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--gold);letter-spacing:2px;margin-bottom:0.25rem">Leader</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:var(--muted)">Declares the Vibe™</div>
+        </div>
+        <div style="background:var(--dark);padding:1rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--accent);letter-spacing:2px;margin-bottom:0.25rem">TD →</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:var(--muted)">Shepherds to YO</div>
+        </div>
+        <div style="background:var(--dark);padding:1rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--gold);letter-spacing:2px;margin-bottom:0.25rem">YO →</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:var(--muted)">Completes &amp; Yeets™</div>
+        </div>
+        <div style="background:var(--dark);padding:1rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--green);letter-spacing:2px;margin-bottom:0.25rem">LO →</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:var(--muted)">Observes Landing™</div>
+        </div>
+        <div style="background:var(--dark);padding:1rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--accent);letter-spacing:2px;margin-bottom:0.25rem">TD →</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:var(--muted)">Assesses &amp; escalates</div>
+        </div>
+        <div style="background:var(--dark);padding:1rem;text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--white);letter-spacing:2px;margin-bottom:0.25rem">Impact</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:var(--muted)">Scored -3 to +3</div>
+        </div>
+      </div>
+  </div>
+
+  <!-- IMPACT CHAIN -->
+  <div style="margin-bottom:0;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--green);letter-spacing:3px;text-transform:uppercase;margin-bottom:0.75rem">03 — Impact</div>
+    <div style="background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);padding:1.5rem;">
+      <p style="margin-bottom:0.75rem">Yeets™ do not stay where they Land™. They travel. The direction depends on the Impact Rating.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);">
+        <div style="background:rgba(0,255,136,0.04);padding:1.25rem;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.5rem">Positive Impact</div>
+          <p style="font-size:1.05rem;color:var(--text);margin-bottom:0.5rem">Credit travels upward, bypassing all intermediate roles, to the Leader Who Vibes. The Vibe™ was visionary. The Leader is acknowledged. The YO, LO, and TDs are not mentioned in the press release.</p>
+          <p style="font-size:1rem;color:var(--muted)">This applies to all Vibes™, including those originated by ICs, interns, and junior engineers. The visionary leader created the environment in which those Vibes™ could flourish. The culture enabled it. The credit reflects that.</p>
+        </div>
+        <div style="background:rgba(255,59,59,0.04);padding:1.25rem;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--red);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.5rem">Negative Impact</div>
+          <p style="font-size:1.05rem;color:var(--text);margin-bottom:0.5rem">Blame stays low by default and is absorbed by YOLO. Under a high negative score it climbs to TD. A truly legendary negative Impact reaches the Leader Who Vibes, who shifts it onto the intern who did the work.</p>
+          <p style="font-size:1rem;color:var(--muted);border-top:1px solid var(--border);padding-top:0.75rem;margin-top:0.5rem">At -3, the intern is named publicly. The Vibe™ stays pristine. The Leader Who Vibes remains visionary. The culture that encouraged the intern to Vibe™ freely is not mentioned.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<hr>
+
+
+<section id="metrics">
+  <h2>Three Metrics. That's It.</h2>
+  <p style="max-width:700px;margin-bottom:0.75rem">DORA measures Deployment Frequency, Lead Time, MTTR, and Change Failure Rate. SPACE measures Satisfaction, Performance, Activity, Communication, and Efficiency across five dimensions. Scrum measures Velocity, Burndown, Burnup, and Cumulative Flow, all of which describe how fast you're going in circles.</p>
+  <p style="max-width:700px;margin-bottom:2rem;color:var(--muted)">DAFSO replaces all of them with three questions, asked in order, actioned only if necessary.</p>
+
+  <div class="metrics-grid">
+    <div class="metric-card" style="border-top:3px solid var(--gold);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.5rem">Metric 01</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);letter-spacing:2px;margin-bottom:0.75rem">Are we vibing?</div>
+      <p style="font-size:1rem;color:var(--text);margin-bottom:0.75rem">Ask the team. If yes, proceed. If no, identify what is blocking the vibe and remove it. This replaces PI Planning, Quarterly Business Reviews, OKR setting, and the annual strategy offsite.</p>
+      <p style="font-size:1rem;color:var(--muted)">Target: yes. Method: ask someone. Cadence: whenever it feels right.</p>
+    </div>
+    <div class="metric-card" style="border-top:3px solid var(--accent);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.5rem">Metric 02</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--accent);letter-spacing:2px;margin-bottom:0.75rem">Are we yeeting?</div>
+      <p style="font-size:1rem;color:var(--text);margin-bottom:0.75rem">Check the deployment log. If things are shipping, yes. If nothing has shipped in two weeks, the vibe has stalled and a Throughput Director needs to locate and remove the blockage.</p>
+      <p style="font-size:1rem;color:var(--muted)"> This replaces DORA Deployment Frequency, Lead Time, and the entire concept of a Release Window.</p>
+    </div>
+    <div class="metric-card" style="border-top:3px solid var(--green);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--green);letter-spacing:2px;text-transform:uppercase;margin-bottom:0.5rem">Metric 03</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--green);letter-spacing:2px;margin-bottom:0.75rem">Are we making impact?</div>
+      <p style="font-size:1rem;color:var(--text);margin-bottom:0.75rem">Check your inbox. Check your press coverage. Check your Slack. If it hasn't reached you, increase Vibing™.</p>
+      <p style="font-size:1rem;color:var(--text);margin-bottom:0.75rem"><strong style="color:var(--green)">Positive impact:</strong> The Yeet™ landed well. Check the Impact. Low positive: increase the Vibes, the Yeets are too small. Medium or high positive: praise flows to the Leader Who Vibes. Forward accordingly.</p>
+      <p style="font-size:1rem;color:var(--text);margin-bottom:0.75rem"><strong style="color:var(--red)">Negative impact:</strong> Something landed badly. Check the Impact. Small or medium: the LO and TDs have it, express concern, await the debrief. Large: read the VYL Report™, identify the YO, ask questions. Legendary: your Yeet™ landed badly at scale. The Impact has reached your altitude. Act accordingly. Blame the intern.</p>
+      <p style="font-size:1rem;color:var(--muted)">Replaces MTTR, Change Failure Rate, NPS, OKR reviews, and the 3am PagerDuty alert. If it hasn't reached you, it isn't your problem <strong style="color:var(--white)">yet.</strong></p>
+    </div>
+  </div>
+
+
+
+  <div class="footnote">
+    <strong>On DORA:</strong> Respected framework. Excellent research. Assumes someone planned the deployment. Not applicable post-Vibe.<br>
+    <strong>On SPACE:</strong> Five dimensions of developer productivity. DAFSO has three. DAFSO wins on brevity.<br>
+    <strong>On Scrum velocity:</strong> Measures points completed per sprint — a unit of work from a world where work was planned in advance. DAFSO measures whether the Yeet™ happened. One of these correlates with shipping software.<br>
+    <strong>On OKRs:</strong> One objective — Vibe, Yeet™, Land. Three key results — yes, yes, not yet. Simpler. More honest. Equally ignored by Q4.<br>
+</section>
+
+<hr>
+
+<section id="tokens">
+  <h2>Tokens: The Office Was Costing You More.<br>You Just Couldn't Measure It.</h2>
+
+  <p style="max-width:700px;margin-bottom:0.75rem">The CFO who questions the token bill never questioned the downtown office lease. The office cost $40,000 a month. It produced proximity. Proximity was supposed to produce ideas. Ideas were supposed to produce software. The chain was long, indirect, and completely unmeasurable. Nobody could tell you if the office was working. Nobody could turn it off and find out.</p>
+
+  <p style="max-width:700px;margin-bottom:2rem;color:var(--muted)">Tokens are different. Tokens are direct. Tokens produce Vibes™. More tokens, more Vibes™. The relationship is not indirect. It is not hoped for. It is not measured by how often people used the ping pong table. <strong style="color:var(--white)">It is measured by the Impact Rating.</strong></p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:2rem;">
+    <div style="background:var(--panel);padding:2rem;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--muted);letter-spacing:3px;text-decoration:line-through;margin-bottom:0.5rem">The Office</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:1.25rem">Indirect investment</div>
+      <div style="font-size:1rem;color:var(--muted);line-height:2;">
+        Fixed cost — years-long lease<br>
+        Cannot be paused<br>
+        Cannot be scaled down on a slow week<br>
+        Produces proximity<br>
+        Proximity hopefully produces ideas<br>
+        Ideas hopefully produce software<br>
+        Software hopefully produces value<br>
+        Value is unmeasurable<br>
+        No Impact Rating<br>
+        Nobody questioned it
+      </div>
+    </div>
+    <div style="background:var(--panel);padding:2rem;border-left:1px solid var(--border);">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);letter-spacing:3px;margin-bottom:0.5rem">Tokens</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:1.25rem">Direct investment</div>
+      <div style="font-size:1rem;color:var(--text);line-height:2;">
+        Variable cost — pay per Vibe™<br>
+        Can be stopped immediately<br>
+        Can be scaled to match the Yeet™ cadence<br>
+        Produces Vibes™ directly<br>
+        More tokens = more Vibes™<br>
+        More Vibes™ = more Yeets™<br>
+        More Yeets™ = more Landings<br>
+        More Landings = more Impact<br>
+        Impact Rating tells you if it was worth it<br>
+        Completely fungible
+      </div>
+    </div>
+  </div>
+
+  <div style="background:rgba(245,200,66,0.04);border:1px solid rgba(245,200,66,0.2);padding:1.75rem;margin-bottom:1.5rem;">
+    <p style="font-size:1rem;color:var(--white);margin-bottom:0.75rem;font-weight:600">Tokens are not a cost centre. They are a Vibe™ multiplier.</p>
+    <p style="font-size:1rem;color:var(--text);margin-bottom:0.75rem">Increase token usage and the Vibes™ increase. Vibes™ increase and the Yeets™ increase. Yeets™ increase the Landings with a THUD. Impact data accumulates and you know — for the first time in the history of your organization — whether your investment is producing real impact on real humans.</p>
+    <p style="font-size:1rem;color:var(--text)">The office never told you that. The office had a ping pong table and hope. Tokens have an Impact Rating.</p>
+  </div>
+
+  <div style="background:var(--panel);border:1px solid var(--border);padding:1.5rem;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem">The only token question that matters</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--red);text-decoration:line-through;margin-bottom:0.4rem">"Why is the token bill so high?"</div>
+        <div style="font-size:1.05rem;color:var(--muted)">The wrong question. Asked by people who also approved the office lease without asking what it produced.</div>
+      </div>
+      <div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--green);margin-bottom:0.4rem">"What is the Impact of our token spend?"</div>
+        <div style="font-size:1.05rem;color:var(--text)">The right question. If the Impact is positive, spend more tokens. If the Impact is negative, increase the Vibes™. If the Impact is zero, the tokens were wasted, which is also what the office was on most Tuesdays, and every weekend.</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<hr>
+
+
+<hr>
+
+<section id="ownership">
+  <h2>DAFSO Does Not Eliminate Jobs.<br>It Expands Them.</h2>
+
+  <p style="max-width:700px;margin-bottom:0.75rem">There is a widespread anxiety that AI is eliminating roles. Restructuring organisations. Flattening hierarchies. Making people redundant. This anxiety is understandable. It is also, from a DAFSO perspective, missing the point.</p>
+
+  <p style="max-width:700px;margin-bottom:0.75rem;color:var(--muted)">DAFSO does not eliminate your role. DAFSO <strong style="color:var(--white)">expands</strong> your role. The QA Engineer's role expands to a Land Officer. The Developer's role expands into Yeet Officer. The five middle management roles are unified into a single TD with full ownership of either the Yeet™ or the Land™. Nothing was lost. Everything grew.</p>
+
+  <p style="max-width:700px;margin-bottom:2rem;color:var(--muted)">AI didn't take your job. AI took the narrow part of your job,the repetitive, the specifiable, the automatable, and handed you back everything that remained — Responsibility.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);margin-bottom:2rem;">
+
+    <div style="background:var(--panel);padding:1.75rem;border-right:none;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem">Before DAFSO</div>
+      <div style="font-size:1rem;color:var(--muted);line-height:2;">
+        QA Engineer<br>
+        Release Manager<br>
+        Incident Commander<br>
+        FinOps Analyst<br>
+        Security Engineer<br>
+        Scrum Master<br>
+        Project Manager<br>
+        Product Manager<br>
+        Engineering Manager<br>
+        Tech Lead<br>
+      </div>
+    </div>
+
+    <div style="background:var(--panel);padding:1.75rem;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem">After DAFSO — expanded</div>
+      <div style="font-size:1rem;line-height:2;">
+        <span style="color:var(--green)">LO</span> <span style="color:var(--muted)">— you always caught what broke</span><br>
+        <span style="color:var(--gold)">YO</span> <span style="color:var(--muted)">— you always pressed the button</span><br>
+        <span style="color:var(--green)">LO</span> <span style="color:var(--muted)">— you always owned the aftermath</span><br>
+        <span style="color:var(--green)">LO</span> <span style="color:var(--muted)">— the bill always landed on you</span><br>
+        <span style="color:var(--green)">LO</span> <span style="color:var(--muted)">— it was always your fault when breached</span><br>
+        <span style="color:var(--muted)">DAFSO Master</span> <span style="color:var(--muted)">— same job, new paperwork</span><br>
+        <span style="color:var(--accent)">TD</span> <span style="color:var(--muted)">— you facilitated the Landing</span><br>
+        <span style="color:var(--accent)">TD</span> <span style="color:var(--muted)">— you enabled the Yeet™</span><br>
+        <span style="color:var(--accent)">TD</span> <span style="color:var(--muted)">— you did both, you get both under one name</span><br>
+        <span style="color:var(--gold)">YO</span> <span style="color:var(--muted)">— you owned it anyway</span><br>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="background:rgba(245,200,66,0.04);border:1px solid rgba(245,200,66,0.2);padding:2rem;margin-bottom:2rem;">
+    <p style="font-size:1rem;color:var(--white);margin-bottom:1rem;font-weight:600">Not sure which role you are?</p>
+    <p style="font-size:1.05rem;color:var(--text);margin-bottom:0.75rem">Ask yourself one question:</p>
+    <p style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold);letter-spacing:2px;margin-bottom:1rem">Did you feel the pressure before the release or after?</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:1rem;">
+      <div style="background:var(--panel);padding:1rem;border:1px solid rgba(245,200,66,0.2);">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold);letter-spacing:2px;margin-bottom:0.4rem">Before</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--accent);letter-spacing:1px;margin-bottom:0.4rem">You are a YO</div>
+        <div style="font-size:1rem;color:var(--muted)">The Yeet™ is yours. You feel it before the button is pressed. That is ownership.</div>
+      </div>
+      <div style="background:var(--panel);padding:1rem;border:1px solid rgba(245,200,66,0.2);">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold);letter-spacing:2px;margin-bottom:0.4rem">After</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--green);letter-spacing:1px;margin-bottom:0.4rem">You are a LO</div>
+        <div style="font-size:1rem;color:var(--muted)">The Landing is yours. You feel it after the button is pressed. That is also ownership.</div>
+      </div>
+      <div style="background:var(--panel);padding:1rem;border:1px solid rgba(245,200,66,0.2);">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--gold);letter-spacing:2px;margin-bottom:0.4rem">Both</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--gold);letter-spacing:1px;margin-bottom:0.4rem">You are a YOLO</div>
+        <div style="font-size:1rem;color:var(--muted)">You Only Live Once. Grab life by the horns.</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr;gap:1rem;margin-top:1rem;">
+      <div style="background:var(--panel);padding:1rem;border:1px solid rgba(0,200,255,0.2);">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--accent);letter-spacing:2px;margin-bottom:0.4rem">Did you manage people feeling the pressure?</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--accent);letter-spacing:1px;margin-bottom:0.4rem">You are a TD</div>
+        <div style="font-size:1rem;color:var(--muted)">Before or after doesn't matter. Someone around you was feeling it and you were managing that feeling. You are a TD.</div>
+      </div>
+    </div>
+  </div>
+
+  <p style="max-width:700px;font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted)">Previously you asked "whose problem is this?" Now you know. It is yours. You own it. Your role expanded and took it over. Congratulations on your expanded role. The certification is available at the bottom of this page.</p>
+
+</section>
+
+<hr>
+
+
+<section id="blame">
+  <h2>Every Other Framework Lied About Blame.<br>DAFSO Delivers.</h2>
+
+  <p style="max-width:700px;margin-bottom:0.75rem;font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted);border-left:3px solid var(--border);padding-left:1rem;font-style:italic">"Root cause analysis exists to find blame without saying the word blame. DAFSO says the word blame."</p>
+
+  <p style="max-width:700px;margin-bottom:0.75rem">Every framework that has ever existed in the history of enterprise software has made the same promise: <strong style="color:var(--white)">we will end the blame game.</strong> DevOps promised psychological safety. DevSecOps promised shared ownership of breaches. Agile promised blameless retrospectives.</p>
+
+  <p style="max-width:700px;margin-bottom:0.75rem;color:var(--muted)">None of it worked. Because humans do not want to end the blame game. Humans want to <em style="color:var(--white)">win</em> it.</p>
+  
+  <p style="max-width:700px;margin-bottom:0.75rem;color:var(--muted)">Blame is how organisations process failure. Blame is how accountability gets assigned. Blame is what happens in the Slack channel, the 1:1, and the all-hands where the Leader Who Vibes expresses concern. You cannot engineer it out. You can only decide in advance who receives it.</p>
+
+  <p style="max-width:700px;margin-bottom:2rem;color:var(--muted)">DAFSO is the first framework honest enough to say this out loud. We do not promise to end the blame game. <strong style="color:var(--white)">We help you win it.</strong></p>
+
+  <div style="border:1px solid var(--border);margin-bottom:2rem;">
+
+    <div style="padding:1.25rem 1.5rem;background:var(--panel);border-bottom:1px solid var(--border);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:1rem">The old questions. The DAFSO answers.</div>
+
+      <div style="display:grid;gap:1px;background:var(--border);">
+
+        <div style="background:var(--dark);padding:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--red);letter-spacing:1px;margin-bottom:0.4rem;text-decoration:line-through">"How did QA miss this?"</div>
+            <div style="font-size:1.05rem;color:var(--muted)">Asked after every production incident since 1987. Never answered satisfactorily. QA didn't miss it. The process missed it. But QA gets the call.</div>
+          </div>
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--green);letter-spacing:1px;margin-bottom:0.4rem">DAFSO answer</div>
+            <div style="font-size:1.05rem;color:var(--text)">There is no QA. The Yeet™ handled quality. The Harden step of the THUD™ caught what the Yeet™ missed. Field 02 of the VYL Report™ names the YO. FIeld 03 of the VYL Report™ names the LO. Field 04 lists the Impact Rating. The question has been answered before it was asked.</div>
+          </div>
+        </div>
+
+        <div style="background:var(--dark);padding:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--red);letter-spacing:1px;margin-bottom:0.4rem;text-decoration:line-through">"Why is the cloud bill so high?"</div>
+            <div style="font-size:1.05rem;color:var(--muted)">Asked every quarter. Answered with a dashboard. Dashboard is very well formatted. Bill remains high. Nobody is named.</div>
+          </div>
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--green);letter-spacing:1px;margin-bottom:0.4rem">DAFSO answer</div>
+            <div style="font-size:1.05rem;color:var(--text)">Check Field 04 of the VYL Report™. If the Impact is negative, the spend was not worth it. Field 02 names the YO. Field 03 names the LO who reconciles the cost. The question has been answered before it was asked.</div>
+          </div>
+        </div>
+
+        <div style="background:var(--dark);padding:1.25rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;">
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--red);letter-spacing:1px;margin-bottom:0.4rem;text-decoration:line-through">"Why wasn't this in the post-mortem?"</div>
+            <div style="font-size:1.05rem;color:var(--muted)">The post-mortem was blameless. The finding was uncomfortable. It did not make the document. It made the 1:1 the following Tuesday instead.</div>
+          </div>
+          <div>
+            <div style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--green);letter-spacing:1px;margin-bottom:0.4rem">DAFSO answer</div>
+            <div style="font-size:1.05rem;color:var(--text)">By design, the DAFSO Master can be retroactively held responsible for not including the details int he report. The question has been answered before it was asked.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <div style="padding:1.5rem;background:rgba(245,200,66,0.04);border-top:1px solid rgba(245,200,66,0.15);">
+    <p style="font-size:1.05rem;color:var(--white);margin-bottom:0.75rem;font-style:italic;text-align:center">"We do not blame the Vibe™. The Vibe™ is sacred. The Vibe™ cannot be wrong."</p>
+    <p style="font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--muted);margin-bottom:1.25rem;text-align:center">We blame the YOLO. If the Impact escalates, we blame the TD. If the Impact goes legal, we name the intern at the deposition. The Vibe™ stays pristine throughout. The Leader Who Vibes remains visionary. The culture that encouraged everyone to Vibe™ freely is not mentioned in any of these documents. For the first time in enterprise software history, blame is pre-assigned before anyone has to ask.</p>
+  </div>
+
+  <br>
+  
+  <div style="text-align:center;">
+    <a href="#certs" class="btn-primary">Get Certified. Win the Blame Game.</a>
+  </div>
+
+</section>
+
+<hr>
+
+
+<section id="certs">
+  <h2>Get Certified. Get DAFSO.</h2>
+  <p style="max-width:700px;margin-bottom:0.75rem">DAFSO certifications signal to the market that you have invested in understanding the framework. They expire with every new foundation model release. This is not arbitrary.</p>
+  <p style="max-width:700px;margin-bottom:0.75rem;color:var(--muted)">A new model vibes differently. Your certified understanding of how to Vibe™ is now based on a model that no longer exists. The AI that would have answered your exam has been superseded. A new AI exists. It needs a new cert. So do you. The logic is airtight.</p>
+
+  <div class="certs-grid">
+    <div class="cert-card cert-v">
+      <div class="cert-badge">DAFSO-V</div>
+      <div class="cert-name">Certified Vibe Practitioner</div>
+      <p>Demonstrates ability to describe requirements to an AI in vague but directional terms and call it architecture. No exam. No prerequisites except feelings and an API key. No exam as the AI would pass it for you anyway.</p>
+      <div class="cert-price">$495</div>
+      <span class="cert-renewal">Renewal per model release: $195</span>
+    </div>
+    <div class="cert-card cert-y">
+      <div class="cert-badge">DAFSO-Y</div>
+      <div class="cert-name">Certified Yeet™ Practitioner</div>
+      <p>Demonstrates ability to deploy to production without a rollback plan and document the decision as intentional. Requires evidence of at least one production Yeet™. Prerequisite: DAFSO-V.</p>
+      <div class="cert-price">$1,200</div>
+      <span class="cert-renewal">Renewal per model release: $400</span>
+    </div>
+    <div class="cert-card cert-l">
+      <div class="cert-badge">DAFSO-L</div>
+      <div class="cert-name">Certified Land Practitioner</div>
+      <p>Demonstrates ability to produce a VYL Report™ that satisfies compliance requirements. Requires evidence of receiving blame. Prerequisite: DAFSO-Y.</p>
+      <div class="cert-price">$2,400</div>
+      <span class="cert-renewal">Renewal per model release: $600</span>
+    </div>
+    <div class="cert-card cert-vyl">
+      <div class="cert-badge">DAFSO-VYL</div>
+      <div class="cert-name">Certified VYL Coach</div>
+      <p>Accredited to teach DAFSO and charge consulting day rates above $2,000. Prerequisite: all three practitioner certs plus 90 days of "DAFSO experience."</p>
+      <div class="cert-price">$6,800</div>
+      <span class="cert-renewal">Renewal per model release: $1,200</span>
+    </div>
+  </div>
+</section>
+
+<div class="testi-section">
+  <div class="testi-inner">
+    <h2>Organisations That Have Encountered DAFSO</h2>
+    <div class="testi-grid">
+      <div class="testi">
+        <p>We had DevOps, then DevSecOps, then FinOps. Our engineers spent more time in framework training than in their IDEs. DAFSO replaced all of it with three words. The Yeet™ frequency tripled. The Landing reports are very thorough.</p>
+        <div class="testi-who">CTO</div>
+        <div class="testi-where">Series C fintech (currently under regulatory review)</div>
+      </div>
+      <div class="testi">
+        <p>Sixteen of eighteen CTOs in our peer group experienced production disasters from vibe coding. The other two had DAFSO. The other two had YOLOs producing VYL Reports™. The other sixteen did not. Draw your own conclusions.</p>
+        <div class="testi-who">VP OF ENGINEERING</div>
+        <div class="testi-where">Enterprise SaaS (publicly traded, stock price: variable)</div>
+      </div>
+      <div class="testi">
+        <p>The LO flagged seventeen concerns before the Yeet™. The THUD Director had the VYL Report™ template ready. We yeeted anyway. The Impact was medium-negative. The Leader Who Vibes was briefed via slide deck and was concerned. We consider this a success.</p>
+        <div class="testi-who">CHIEF DIGITAL OFFICER</div>
+        <div class="testi-where">Global enterprise (name withheld pending legal outcome)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <h2>The Vibes Are Sublime. Jump In.</h2>
+  <p style="max-width:700px;margin-bottom:1rem">Gartner has not yet recognised DAFSO as a category. We expect this within 18 months. At that point, certification prices increase and consultant day rates double. Early adopters lock in current pricing.</p>
+  <a href="#certs" class="btn-primary">Get Certified Today</a>
+</section>
+
+<footer>
+  <strong>DAFSO</strong> — The DevAIFinSecOps Framework™ &nbsp;·&nbsp; Vibe. Yeet™. Land.<br>
+  Making enterprises feel better about AI transformation since this year.<br>
+  <div class="footer-links">
+    <a href="#methodology">Methodology</a>
+    <a href="#thud">THUD</a>
+    <a href="#org">The Org</a>
+    <a href="#roles">Roles</a>
+    <a href="#metrics">Metrics</a>
+    <a href="#blame">Win the Blame Game</a>
+    <a href="#certs">Certifications</a>
+    <a href="#">Summit</a>
+    <a href="#">Legal</a>
+  </div>
+  <p style="margin-top:1.5rem;font-size:1.05rem;line-height:1.8;color:var(--border)">
+    DAFSO™, DevAIFinSecOps™, Vibe™. Yeet™. Land™., the Yeet™, IR (Impact Rating)™, the VYL Report™, THUD™, DAFSO Master™, and are trademarks of the DAFSO Foundation. The DAFSO Foundation is a privately held entity with no affiliation to any organisation that has successfully shipped software on schedule. Certifications are educational products. Results are unattributable. No refunds. The DAFSO Foundation is not responsible for Yeets that occur during or after certification training.
+  </p>
+</footer>
+
+
+<div style="background:var(--dark);border-top:2px solid var(--border);padding:2rem;text-align:center;">
+  <p style="font-family:'IBM Plex Mono',monospace;font-size:1.05rem;color:var(--muted);max-width:700px;margin:0 auto;line-height:1.8;">
+    <strong style="color:var(--gold)">⚠ THIS IS A JOKE.</strong> DAFSO, the DevAIFinSecOps Framework, Vibe™, Yeet™, Land™, the THUD process, the Impact, the VYL Report™, the Yeet Officer, the Land Officer, the YOLO, the Throughput Director, the THUD Director, the DAFSO Master, and the Leader Who Vibes are satirical constructs created for entertainment purposes. They are not real certifications, real roles, or a real framework. Any resemblance to actual enterprise frameworks, living or dead, is entirely intentional and also kind of the point.<br><br>
+    That said, the Impact Rating is a genuinely good idea for your next AI initiative.<br><br>
+  </p>
+</div>
+
+
+</body>
